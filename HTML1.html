@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AR at Current Location</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
+  </head>
+  <body style="margin: 0; overflow: hidden;">
+    <a-scene
+      vr-mode-ui="enabled: false"
+      embedded
+      arjs="sourceType: webcam; gpsMinAccuracy: 100; gpsTimeInterval: 1000;"
+    >
+      <!-- AR camera -->
+      <a-camera gps-camera rotation-reader></a-camera>
+
+      <!-- Placeholder image element, will set GPS coords with JS -->
+      <a-image id="myImage"
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQw7Ruc3aDfDuCbY_FFQ-23U1on7qndeh-dNw&s"
+        look-at="[gps-camera]"
+        scale="5 5 5">
+      </a-image>
+
+      <!-- Optional: text label -->
+      <a-text id="myText"
+        value="You are here!"
+        look-at="[gps-camera]"
+        scale="10 10 10"
+        position="0 10 0"
+        color="#FFFFFF">
+      </a-text>
+    </a-scene>
+
+    <script>
+      window.onload = () => {
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition((position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            const image = document.getElementById("myImage");
+            const text = document.getElementById("myText");
+
+            // Set GPS position for image and text
+            image.setAttribute("gps-entity-place", `latitude: ${lat}; longitude: ${lon}`);
+            text.setAttribute("gps-entity-place", `latitude: ${lat}; longitude: ${lon}`);
+          }, (err) => {
+            console.error('Error getting location:', err);
+          }, {
+            enableHighAccuracy: true
+          });
+        } else {
+          alert("Geolocation is not supported by your browser.");
+        }
+      };
+    </script>
+  </body>
+</html>
