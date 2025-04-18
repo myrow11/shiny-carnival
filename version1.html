@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Visa AR Rewards</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: 'Arial', sans-serif;
+      }
+
+      #rewardCounter {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: #1A1F71;
+        padding: 10px 20px;
+        color: #FFB500;
+        font-size: 18px;
+        border-radius: 10px;
+        z-index: 10;
+      }
+
+      #loadingScreen {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0,0,0,0.8);
+        color: #fff;
+        font-size: 24px;
+        padding: 20px 40px;
+        border-radius: 12px;
+        z-index: 20;
+        text-align: center;
+      }
+
+      #confettiMessage {
+        position: absolute;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 28px;
+        background: #FFB500;
+        color: #1A1F71;
+        padding: 20px 30px;
+        border-radius: 12px;
+        z-index: 20;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen">Loading AR Experience...</div>
+
+    <!-- Reward Counter -->
+    <div id="rewardCounter">Rewards Collected: <span id="count">0</span></div>
+
+    <!-- Confetti Message -->
+    <div id="confettiMessage">🎉 You Collected a Visa Reward!</div>
+
+    <a-scene
+      vr-mode-ui="enabled: false"
+      embedded
+      arjs="sourceType: webcam; gpsMinAccuracy: 30; gpsTimeInterval: 1000;"
+    >
+      <a-camera gps-camera rotation-reader></a-camera>
+
+      <!-- 3D Visa Reward Model -->
+      <a-gltf-model
+        id="reward"
+        src="https://myrow11.github.io/3d/visa.glb"
+        scale="2 2 2"
+        look-at="[gps-camera]"
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 15000"
+        gps-entity-place="latitude: 0; longitude: 0">
+      </a-gltf-model>
+    </a-scene>
+
+    <script>
+      let rewardCollected = false;
+
+      window.onload = () => {
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition((position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            const reward = document.getElementById("reward");
+
+            // Offset reward 10 meters north
+            const offset = 0.00009;
+            reward.setAttribute("gps-entity-place", `latitude: ${lat + offset}; longitude: ${lon}`);
+
+            // Hide loading screen
+            document.getElementById('loadingScreen').style.display = 'none';
+
+            // Collect reward on click
+            reward.addEventListener("click", () => {
+              if (!rewardCollected) {
+                rewardCollected = true;
+                reward.setAttribute("visible", "false");
+                document.getElementById("count").innerText = 1;
+
+                // Show confetti popup
+                const confetti = document.getElementById('confettiMessage');
+                confetti.style.display = 'block';
+
+                setTimeout(() => {
+                  confetti.style.display = 'none';
+                }, 3000); // Hide after 3 seconds
+              }
+            });
+          }, (err) => {
+            console.error("Location error:", err);
+            document.getElementById('loadingScreen').innerText = '⚠️ Location Error. Please enable GPS and refresh.';
+          }, {
+            enableHighAccuracy: true
+          });
+        } else {
+          document.getElementById('loadingScreen').innerText = '⚠️ Geolocation not supported by your browser.';
+        }
+      };
+    </script>
+  </body>
+</html>
