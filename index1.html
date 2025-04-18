@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Visa AR Shop</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
+    <script>
+      AFRAME.registerComponent('product-click', {
+        schema: {
+          url: { type: 'string' }
+        },
+        init: function () {
+          this.el.addEventListener('click', () => {
+            window.open(this.data.url, '_blank');
+          });
+        }
+      });
+    </script>
+  </head>
+  <body style="margin: 0; overflow: hidden;">
+    <a-scene
+      vr-mode-ui="enabled: false"
+      embedded
+      arjs="sourceType: webcam; gpsMinAccuracy: 30; gpsTimeInterval: 1000;"
+    >
+      <!-- AR camera -->
+      <a-camera gps-camera rotation-reader></a-camera>
+
+      <!-- Visa Header Logo -->
+      <a-image 
+        src="https://i.imgur.com/DJjlNk8.png"
+        scale="10 10 10"
+        gps-entity-place="latitude: 0; longitude: 0"
+        position="0 10 0"
+        look-at="[gps-camera]">
+      </a-image>
+
+      <!-- Product 1 -->
+      <a-image 
+        src="https://i.imgur.com/HFqZrVL.png" 
+        scale="6 6 6"
+        gps-entity-place="latitude: 0; longitude: 0"
+        position="-10 0 0"
+        look-at="[gps-camera]"
+        product-click="url: https://i.imgur.com/HFqZrVL.png">
+      </a-image>
+
+      <!-- Product 2 -->
+      <a-image 
+        src="https://i.imgur.com/HFqZrVL.png" 
+        scale="6 6 6"
+        gps-entity-place="latitude: 0; longitude: 0"
+        position="10 0 0"
+        look-at="[gps-camera]"
+        product-click="url: https://i.imgur.com/HFqZrVL.png">
+      </a-image>
+
+      <!-- Optional: floating text -->
+      <a-text 
+        value="Tap a product to shop with Visa!"
+        position="0 15 0"
+        look-at="[gps-camera]"
+        scale="12 12 12"
+        color="#FFD700">
+      </a-text>
+    </a-scene>
+
+    <script>
+      // Replace lat/lon with actual location on load
+      window.onload = () => {
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition((position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            const images = document.querySelectorAll('[gps-entity-place]');
+            images.forEach((el, i) => {
+              el.setAttribute('gps-entity-place', `latitude: ${lat}; longitude: ${lon}`);
+            });
+          }, (err) => {
+            console.error('Location error:', err);
+          }, {
+            enableHighAccuracy: true
+          });
+        } else {
+          alert("Geolocation is not supported by your browser.");
+        }
+      };
+    </script>
+  </body>
+</html>
